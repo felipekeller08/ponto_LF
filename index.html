@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Controle de Ponto - Agência LF</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Controle de Ponto - Agência LF</h1>
+
+    <label for="usuario">Quem está trabalhando?</label>
+    <select id="usuario">
+      <option value="Lucas">Lucas</option>
+      <option value="Felipe">Felipe</option>
+    </select>
+
+    <label for="tarefa">Nome da Tarefa</label>
+    <input type="text" id="tarefa" placeholder="Ex: Post Instagram" />
+
+    <div class="botoes">
+      <button id="startBtn">Iniciar</button>
+      <button id="stopBtn" disabled>Finalizar</button>
+    </div>
+
+    <h2 id="cronometro">00:00:00</h2>
+
+    <table id="registros">
+      <thead>
+        <tr>
+          <th>Usuário</th>
+          <th>Tarefa</th>
+          <th>Data</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Duração</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
