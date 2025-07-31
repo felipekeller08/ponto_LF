@@ -8,7 +8,6 @@ import {
   update
 } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 
-// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCYL7rtR12hAyH0wejHUwZ-okkvPVq2gts",
   authDomain: "pontolf-b225c.firebaseapp.com",
@@ -25,7 +24,6 @@ const db = getDatabase(app);
 let startTime;
 let interval;
 
-// DOM
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const cronometro = document.getElementById('cronometro');
@@ -37,7 +35,6 @@ const btnAdd = document.getElementById('adicionarTarefa');
 const listaLucas = document.getElementById('listaLucas');
 const listaFelipe = document.getElementById('listaFelipe');
 
-// Funções auxiliares para cálculo de tempo
 function calcularSegundos(duracaoStr) {
   const [h, m, s] = duracaoStr.split(':').map(Number);
   return h * 3600 + m * 60 + s;
@@ -50,9 +47,22 @@ function formatarTempo(segundos) {
   return `${h}:${m}:${s}`;
 }
 
-// Iniciar tarefa
+const tempoSalvo = localStorage.getItem('pontoLF_startTime');
+if (tempoSalvo) {
+  startTime = new Date(tempoSalvo);
+  startBtn.disabled = true;
+  stopBtn.disabled = false;
+
+  interval = setInterval(() => {
+    const now = new Date();
+    const diff = new Date(now - startTime);
+    cronometro.textContent = diff.toISOString().substr(11, 8);
+  }, 1000);
+}
+
 startBtn.addEventListener('click', () => {
   startTime = new Date();
+  localStorage.setItem('pontoLF_startTime', startTime.toISOString());
   startBtn.disabled = true;
   stopBtn.disabled = false;
 
@@ -63,9 +73,9 @@ startBtn.addEventListener('click', () => {
   }, 1000);
 });
 
-// Finalizar tarefa
 stopBtn.addEventListener('click', () => {
   clearInterval(interval);
+  localStorage.removeItem('pontoLF_startTime');
 
   const endTime = new Date();
   const diff = new Date(endTime - startTime);
@@ -92,7 +102,6 @@ stopBtn.addEventListener('click', () => {
   stopBtn.disabled = true;
 });
 
-// Carregar registros e tempo total
 function carregarRegistros() {
   const registrosRef = ref(db, 'registros');
   onValue(registrosRef, (snapshot) => {
@@ -138,7 +147,6 @@ function carregarRegistros() {
 }
 carregarRegistros();
 
-// Adicionar nova tarefa
 btnAdd.addEventListener('click', () => {
   const texto = nomeTarefa.value.trim();
   const user = responsavel.value;
@@ -158,7 +166,6 @@ btnAdd.addEventListener('click', () => {
   dataTarefa.value = new Date().toISOString().split("T")[0];
 });
 
-// Carregar tarefas
 function carregarTarefas() {
   const tarefasRef = ref(db, 'tarefas');
   onValue(tarefasRef, (snapshot) => {
