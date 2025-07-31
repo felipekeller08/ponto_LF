@@ -12,11 +12,14 @@ body {
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 h1 {
   text-align: center;
   color: #003366;
+  font-size: 1.8rem;
 }
 
 label {
@@ -30,12 +33,15 @@ input, select {
   padding: 10px;
   margin-top: 5px;
   font-size: 1rem;
+  box-sizing: border-box;
 }
 
 .botoes {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
   margin-top: 20px;
+  gap: 10px;
 }
 
 button {
@@ -44,16 +50,26 @@ button {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  width: 100%;
+  max-width: 150px;
 }
 
 #startBtn {
   background: #00BFFF;
   color: white;
 }
+#startBtn:hover {
+  background: #039c03;
+  transform: scale(1.1);
+}
 
 #stopBtn {
   background: #003366;
   color: white;
+}
+#stopBtn:hover {
+  background: #9c0d03;
+  transform: scale(1.1);
 }
 
 #cronometro {
@@ -63,14 +79,240 @@ button {
   color: #000;
 }
 
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 30px;
+  min-width: 600px;
 }
 
 th, td {
   border: 1px solid #ccc;
   padding: 10px;
   text-align: center;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.excluir-btn {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.excluir-btn:hover {
+  background: #cc0000;
+  transform: scale(1.2);
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+}
+
+.nova-tarefa {
+  margin-top: 30px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.nova-tarefa input[type="text"],
+.nova-tarefa input[type="date"],
+.nova-tarefa select {
+  padding: 10px;
+  font-size: 1rem;
+  flex: 1;
+  min-width: 180px;
+  box-sizing: border-box;
+}
+
+.nova-tarefa button {
+  padding: 10px 20px;
+  background: #003366;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  max-width: 200px;
+}
+
+.nova-tarefa button:hover {
+  background: #005599;
+}
+
+.listas {
+  display: flex;
+  justify-content: space-between;
+  gap: 50px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+li {
+  margin-bottom: 12px;
+  padding: 10px 15px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  flex-wrap: wrap;
+}
+
+li.checked {
+  text-decoration: line-through;
+  color: gray;
+}
+
+li span {
+  flex-grow: 1;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.titulo-lucas {
+  color: #003366;
+  margin-bottom: 10px;
+}
+
+.titulo-felipe {
+  color: green;
+  margin-bottom: 10px;
+}
+
+.tempo-total {
+  display: flex;
+  justify-content: space-between;
+  background: #eaeaea;
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.tempo-total div {
+  flex: 1;
+  text-align: center;
+}
+
+/* Cores dos nomes na tabela */
+.usuario-lucas {
+  color: #003366;
+  font-weight: bold;
+}
+
+.usuario-felipe {
+  color: green;
+  font-weight: bold;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .botoes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nova-tarefa {
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .tempo-total {
+    flex-direction: column;
+    font-size: 1rem;
+  }
+
+  table {
+    font-size: 0.85rem;
+  }
+
+  li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  #cronometro {
+    font-size: 1.5rem;
+  }
+
+  table {
+    font-size: 0.75rem;
+  }
+
+  th, td {
+    font-size: 0.7rem;
+    padding: 6px;
+  }
+}
+/* Estilo responsivo da tabela sem scroll horizontal */
+@media (max-width: 768px) {
+  table {
+    font-size: 0.75rem;
+  }
+
+  th, td {
+    padding: 6px 4px;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  th {
+    font-weight: bold;
+  }
+
+  .botoes {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tempo-total {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nova-tarefa {
+    flex-direction: column;
+  }
+
+  .listas {
+    flex-direction: column;
+  }
+
+  h1, h2, h3 {
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  #cronometro {
+    font-size: 1.5rem;
+  }
 }

@@ -26,19 +26,56 @@
 
     <h2 id="cronometro">00:00:00</h2>
 
-    <table id="registros">
-      <thead>
-        <tr>
-          <th>Usuário</th>
-          <th>Tarefa</th>
-          <th>Data</th>
-          <th>Início</th>
-          <th>Fim</th>
-          <th>Duração</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <!-- TABELA RESPONSIVA -->
+    <div class="table-container">
+      <table id="registros">
+        <thead>
+          <tr>
+            <th>Usuário</th>
+            <th>Tarefa</th>
+            <th>Data</th>
+            <th>Início</th>
+            <th>Fim</th>
+            <th>Duração</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- TEMPO TOTAL -->
+    <h2>⏱️ Tempo Total Trabalhado</h2>
+    <div class="tempo-total">
+      <div><strong>Lucas:</strong> <span id="tempoLucas">00:00:00</span></div>
+      <div><strong>Felipe:</strong> <span id="tempoFelipe">00:00:00</span></div>
+    </div>
+
+    <!-- LISTA DE TAREFAS -->
+    <div class="secao-tarefas">
+      <h2>📋 Lista de Tarefas Pendentes</h2>
+
+      <div class="nova-tarefa">
+        <input type="text" id="nomeTarefa" placeholder="Ex: 5 posts para o Instagram" />
+        <input type="date" id="dataTarefa" />
+        <select id="responsavel">
+          <option value="Lucas">Lucas</option>
+          <option value="Felipe">Felipe</option>
+        </select>
+        <button id="adicionarTarefa">Adicionar</button>
+      </div>
+
+      <div class="listas">
+        <div>
+          <h3 class="titulo-lucas">LUCAS</h3>
+          <ul id="listaLucas"></ul>
+        </div>
+        <div>
+          <h3 class="titulo-felipe">FELIPE</h3>
+          <ul id="listaFelipe"></ul>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="script.js"></script>

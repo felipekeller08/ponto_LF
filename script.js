@@ -1,5 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  onValue,
+  remove,
+  update
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -18,10 +25,30 @@ const db = getDatabase(app);
 let startTime;
 let interval;
 
+// DOM
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const cronometro = document.getElementById('cronometro');
 const tabela = document.querySelector('#registros tbody');
+const nomeTarefa = document.getElementById('nomeTarefa');
+const dataTarefa = document.getElementById('dataTarefa');
+const responsavel = document.getElementById('responsavel');
+const btnAdd = document.getElementById('adicionarTarefa');
+const listaLucas = document.getElementById('listaLucas');
+const listaFelipe = document.getElementById('listaFelipe');
+
+// Funções auxiliares para cálculo de tempo
+function calcularSegundos(duracaoStr) {
+  const [h, m, s] = duracaoStr.split(':').map(Number);
+  return h * 3600 + m * 60 + s;
+}
+
+function formatarTempo(segundos) {
+  const h = String(Math.floor(segundos / 3600)).padStart(2, '0');
+  const m = String(Math.floor((segundos % 3600) / 60)).padStart(2, '0');
+  const s = String(segundos % 60).padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
 
 // Iniciar tarefa
 startBtn.addEventListener('click', () => {
@@ -50,7 +77,6 @@ stopBtn.addEventListener('click', () => {
   const horaInicio = startTime.toLocaleTimeString();
   const horaFim = endTime.toLocaleTimeString();
 
-  // Salvar no Firebase
   push(ref(db, 'registros'), {
     usuario,
     tarefa,
@@ -66,29 +92,120 @@ stopBtn.addEventListener('click', () => {
   stopBtn.disabled = true;
 });
 
-// Carregar registros salvos do Firebase
+// Carregar registros e tempo total
 function carregarRegistros() {
   const registrosRef = ref(db, 'registros');
   onValue(registrosRef, (snapshot) => {
     const data = snapshot.val();
-    tabela.innerHTML = ""; // Limpa a tabela antes de adicionar os registros
+    tabela.innerHTML = "";
+
+    let totalLucas = 0;
+    let totalFelipe = 0;
 
     for (const id in data) {
       const registro = data[id];
+      const duracaoSegundos = calcularSegundos(registro.duracao);
+
+      if (registro.usuario === "Lucas") totalLucas += duracaoSegundos;
+      if (registro.usuario === "Felipe") totalFelipe += duracaoSegundos;
 
       const row = document.createElement("tr");
+      const usuarioClass = registro.usuario === "Lucas" ? "usuario-lucas" : "usuario-felipe";
+
       row.innerHTML = `
-        <td>${registro.usuario}</td>
+        <td class="${usuarioClass}">${registro.usuario}</td>
         <td>${registro.tarefa}</td>
         <td>${registro.data}</td>
         <td>${registro.horaInicio}</td>
         <td>${registro.horaFim}</td>
         <td>${registro.duracao}</td>
+        <td><button class="excluir-btn" data-id="${id}">🗑️</button></td>
       `;
+
       tabela.appendChild(row);
+
+      row.querySelector(".excluir-btn").addEventListener("click", () => {
+        const confirmar = confirm("Tem certeza que deseja excluir esta tarefa?");
+        if (confirmar) {
+          remove(ref(db, 'registros/' + id));
+        }
+      });
+    }
+
+    document.getElementById('tempoLucas').textContent = formatarTempo(totalLucas);
+    document.getElementById('tempoFelipe').textContent = formatarTempo(totalFelipe);
+  });
+}
+carregarRegistros();
+
+// Adicionar nova tarefa
+btnAdd.addEventListener('click', () => {
+  const texto = nomeTarefa.value.trim();
+  const user = responsavel.value;
+  const data = dataTarefa.value;
+
+  if (!texto || !data) return;
+
+  push(ref(db, 'tarefas'), {
+    responsavel: user,
+    texto,
+    data,
+    concluida: false,
+    timestamp: Date.now()
+  });
+
+  nomeTarefa.value = "";
+  dataTarefa.value = new Date().toISOString().split("T")[0];
+});
+
+// Carregar tarefas
+function carregarTarefas() {
+  const tarefasRef = ref(db, 'tarefas');
+  onValue(tarefasRef, (snapshot) => {
+    const data = snapshot.val();
+    listaLucas.innerHTML = "";
+    listaFelipe.innerHTML = "";
+
+    for (const id in data) {
+      const tarefa = data[id];
+      const li = document.createElement('li');
+      li.classList.add("tarefa-item");
+
+      const checkbox = document.createElement('input');
+      checkbox.type = "checkbox";
+      checkbox.checked = tarefa.concluida;
+      if (tarefa.concluida) li.classList.add("checked");
+
+      checkbox.addEventListener('change', () => {
+        update(ref(db, 'tarefas/' + id), {
+          concluida: checkbox.checked
+        });
+      });
+
+      const textoSpan = document.createElement("span");
+      textoSpan.textContent = `${tarefa.texto} (${tarefa.data})`;
+      textoSpan.classList.add("texto-tarefa");
+
+      const excluirBtn = document.createElement("button");
+      excluirBtn.textContent = "🗑️";
+      excluirBtn.classList.add("excluir-btn");
+      excluirBtn.addEventListener("click", () => {
+        const confirmar = confirm("Deseja excluir esta tarefa?");
+        if (confirmar) {
+          remove(ref(db, 'tarefas/' + id));
+        }
+      });
+
+      li.appendChild(checkbox);
+      li.appendChild(textoSpan);
+      li.appendChild(excluirBtn);
+
+      if (tarefa.responsavel === "Lucas") {
+        listaLucas.appendChild(li);
+      } else {
+        listaFelipe.appendChild(li);
+      }
     }
   });
 }
-
-// Carregar ao abrir a página
-carregarRegistros();
+carregarTarefas();
