@@ -68,7 +68,10 @@ function enviarRegistrosOffline() {
   registrosOffline.forEach(reg => {
     push(ref(db, 'registros'), reg);
   });
-  if (registrosOffline.length > 0) localStorage.removeItem("registrosOffline");
+  if (registrosOffline.length > 0) {
+    localStorage.removeItem("registrosOffline");
+    mostrarToast("✅ Registros offline enviados com sucesso!");
+  }
 }
 
 window.addEventListener("online", enviarRegistrosOffline);
@@ -111,6 +114,7 @@ stopBtn.addEventListener('click', () => {
     push(ref(db, 'registros'), registro);
   } else {
     salvarLocalOffline(registro);
+    mostrarToast("⏳ Registro salvo localmente. Ele será enviado quando a internet voltar.");
   }
 
   cronometro.textContent = '00:00:00';
@@ -230,3 +234,13 @@ function carregarTarefas() {
   });
 }
 carregarTarefas();
+
+function mostrarToast(mensagem) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = mensagem;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.remove();
+  }, 4000);
+}

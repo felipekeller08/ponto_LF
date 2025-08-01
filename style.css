@@ -316,3 +316,23 @@ li span {
     font-size: 1.5rem;
   }
 }
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #003366;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  animation: fadeInOut 4s forwards;
+  z-index: 9999;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(10px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
+}
