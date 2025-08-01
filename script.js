@@ -1,3 +1,4 @@
+// Firebase Config e Inicialização
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import {
   getDatabase,
@@ -21,8 +22,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let startTime;
-let interval;
+let startTimes = {}; // Cronômetro por usuário
+let intervals = {};
 
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -47,47 +48,56 @@ function formatarTempo(segundos) {
   return `${h}:${m}:${s}`;
 }
 
-const tempoSalvo = localStorage.getItem('pontoLF_startTime');
-if (tempoSalvo) {
-  startTime = new Date(tempoSalvo);
-  startBtn.disabled = true;
-  stopBtn.disabled = false;
-
-  interval = setInterval(() => {
+function atualizarCronometro(usuario) {
+  const startTime = new Date(startTimes[usuario]);
+  intervals[usuario] = setInterval(() => {
     const now = new Date();
     const diff = new Date(now - startTime);
     cronometro.textContent = diff.toISOString().substr(11, 8);
   }, 1000);
 }
 
+function salvarLocalOffline(registro) {
+  let registrosOffline = JSON.parse(localStorage.getItem("registrosOffline")) || [];
+  registrosOffline.push(registro);
+  localStorage.setItem("registrosOffline", JSON.stringify(registrosOffline));
+}
+
+function enviarRegistrosOffline() {
+  const registrosOffline = JSON.parse(localStorage.getItem("registrosOffline")) || [];
+  registrosOffline.forEach(reg => {
+    push(ref(db, 'registros'), reg);
+  });
+  if (registrosOffline.length > 0) localStorage.removeItem("registrosOffline");
+}
+
+window.addEventListener("online", enviarRegistrosOffline);
+
 startBtn.addEventListener('click', () => {
-  startTime = new Date();
-  localStorage.setItem('pontoLF_startTime', startTime.toISOString());
+  const usuario = document.getElementById('usuario').value;
+  startTimes[usuario] = new Date();
+  localStorage.setItem(`pontoLF_startTime_${usuario}`, startTimes[usuario].toISOString());
   startBtn.disabled = true;
   stopBtn.disabled = false;
-
-  interval = setInterval(() => {
-    const now = new Date();
-    const diff = new Date(now - startTime);
-    cronometro.textContent = diff.toISOString().substr(11, 8);
-  }, 1000);
+  atualizarCronometro(usuario);
 });
 
 stopBtn.addEventListener('click', () => {
-  clearInterval(interval);
-  localStorage.removeItem('pontoLF_startTime');
+  const usuario = document.getElementById('usuario').value;
+  clearInterval(intervals[usuario]);
+  localStorage.removeItem(`pontoLF_startTime_${usuario}`);
 
   const endTime = new Date();
+  const startTime = new Date(startTimes[usuario]);
   const diff = new Date(endTime - startTime);
   const duracao = diff.toISOString().substr(11, 8);
 
-  const usuario = document.getElementById('usuario').value;
   const tarefa = document.getElementById('tarefa').value || "Sem título";
   const data = startTime.toLocaleDateString();
   const horaInicio = startTime.toLocaleTimeString();
   const horaFim = endTime.toLocaleTimeString();
 
-  push(ref(db, 'registros'), {
+  const registro = {
     usuario,
     tarefa,
     data,
@@ -95,7 +105,13 @@ stopBtn.addEventListener('click', () => {
     horaFim,
     duracao,
     timestamp: Date.now()
-  });
+  };
+
+  if (navigator.onLine) {
+    push(ref(db, 'registros'), registro);
+  } else {
+    salvarLocalOffline(registro);
+  }
 
   cronometro.textContent = '00:00:00';
   startBtn.disabled = false;
@@ -134,8 +150,7 @@ function carregarRegistros() {
       tabela.appendChild(row);
 
       row.querySelector(".excluir-btn").addEventListener("click", () => {
-        const confirmar = confirm("Tem certeza que deseja excluir esta tarefa?");
-        if (confirmar) {
+        if (confirm("Tem certeza que deseja excluir esta tarefa?")) {
           remove(ref(db, 'registros/' + id));
         }
       });
@@ -197,8 +212,7 @@ function carregarTarefas() {
       excluirBtn.textContent = "🗑️";
       excluirBtn.classList.add("excluir-btn");
       excluirBtn.addEventListener("click", () => {
-        const confirmar = confirm("Deseja excluir esta tarefa?");
-        if (confirmar) {
+        if (confirm("Deseja excluir esta tarefa?")) {
           remove(ref(db, 'tarefas/' + id));
         }
       });
