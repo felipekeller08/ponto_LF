@@ -22,7 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let startTimes = {}; // Cronômetro por usuário
+let startTimes = {};
 let intervals = {};
 
 const startBtn = document.getElementById('startBtn');
@@ -47,7 +47,6 @@ function formatarTempo(segundos) {
   const s = String(segundos % 60).padStart(2, '0');
   return `${h}:${m}:${s}`;
 }
-
 function atualizarCronometro(usuario) {
   const startTime = new Date(startTimes[usuario]);
   intervals[usuario] = setInterval(() => {
@@ -76,10 +75,43 @@ function enviarRegistrosOffline() {
 
 window.addEventListener("online", enviarRegistrosOffline);
 
+window.addEventListener("load", () => {
+  const usuarioSalvo = localStorage.getItem("pontoLF_usuario");
+  const tarefaSalva = localStorage.getItem("pontoLF_tarefa");
+  const startSalvoLucas = localStorage.getItem("pontoLF_startTime_Lucas");
+  const startSalvoFelipe = localStorage.getItem("pontoLF_startTime_Felipe");
+
+  if (usuarioSalvo) document.getElementById("usuario").value = usuarioSalvo;
+  if (tarefaSalva) document.getElementById("tarefa").value = tarefaSalva;
+
+  if (startSalvoLucas) {
+    startTimes["Lucas"] = new Date(startSalvoLucas);
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    atualizarCronometro("Lucas");
+  }
+
+  if (startSalvoFelipe) {
+    startTimes["Felipe"] = new Date(startSalvoFelipe);
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    atualizarCronometro("Felipe");
+  }
+});
 startBtn.addEventListener('click', () => {
   const usuario = document.getElementById('usuario').value;
+  const tarefa = document.getElementById('tarefa').value || "Sem título";
+
+  if (!usuario) {
+    mostrarToast("⚠️ Selecione um usuário!");
+    return;
+  }
+
   startTimes[usuario] = new Date();
   localStorage.setItem(`pontoLF_startTime_${usuario}`, startTimes[usuario].toISOString());
+  localStorage.setItem("pontoLF_usuario", usuario);
+  localStorage.setItem("pontoLF_tarefa", tarefa);
+
   startBtn.disabled = true;
   stopBtn.disabled = false;
   atualizarCronometro(usuario);
@@ -87,15 +119,18 @@ startBtn.addEventListener('click', () => {
 
 stopBtn.addEventListener('click', () => {
   const usuario = document.getElementById('usuario').value;
+  const tarefa = document.getElementById('tarefa').value || "Sem título";
+
   clearInterval(intervals[usuario]);
   localStorage.removeItem(`pontoLF_startTime_${usuario}`);
+  localStorage.removeItem("pontoLF_usuario");
+  localStorage.removeItem("pontoLF_tarefa");
 
   const endTime = new Date();
   const startTime = new Date(startTimes[usuario]);
   const diff = new Date(endTime - startTime);
   const duracao = diff.toISOString().substr(11, 8);
 
-  const tarefa = document.getElementById('tarefa').value || "Sem título";
   const data = startTime.toLocaleDateString();
   const horaInicio = startTime.toLocaleTimeString();
   const horaFim = endTime.toLocaleTimeString();
@@ -112,16 +147,16 @@ stopBtn.addEventListener('click', () => {
 
   if (navigator.onLine) {
     push(ref(db, 'registros'), registro);
+    mostrarToast("✅ Registro salvo com sucesso!");
   } else {
     salvarLocalOffline(registro);
-    mostrarToast("⏳ Registro salvo localmente. Ele será enviado quando a internet voltar.");
+    mostrarToast("⏳ Registro salvo localmente. Será enviado quando a internet voltar.");
   }
 
   cronometro.textContent = '00:00:00';
   startBtn.disabled = false;
   stopBtn.disabled = true;
 });
-
 function carregarRegistros() {
   const registrosRef = ref(db, 'registros');
   onValue(registrosRef, (snapshot) => {
