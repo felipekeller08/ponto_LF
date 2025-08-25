@@ -1,10 +1,7 @@
 const CACHE_NAME = 'agencia-lf-cache-v1';
 const urlsToCache = [
   './',
-  './index.html',
-  './style.css',
-  './script.js',
-  './manifest.json',
+ 
   './icon-192.png',
   './icon-512.png'
 ];

@@ -1,7 +1,7 @@
 {
   "name": "Agência LF",
   "short_name": "AgênciaLF",
-  "start_url": "./index.html",
+  "start_url": "./ponto.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#003366",
