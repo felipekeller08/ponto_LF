@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Agência LF — Ponto & Projetos</title>
+  <meta name="description" content="Sistema de ponto, tarefas e fluxo de projetos da Agência LF." />
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png" sizes="192x192">
+  <meta name="theme-color" content="#111827">
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: {
+        boxShadow: { glow: '0 0 0 1px rgba(99,102,241,.25), 0 8px 30px rgba(99,102,241,.15)' }
+      } }
+    }
+  </script>
+  <style>
+    /* extras sutis */
+    .glass { backdrop-filter: blur(12px); background: rgba(255,255,255,.7); }
+    .dark .glass { background: rgba(17,24,39,.6); }
+  </style>
+</head>
+<body class="h-full bg-gradient-to-b from-slate-900/5 to-slate-900/20 dark:from-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 selection:bg-indigo-300/40 dark:selection:bg-indigo-500/40">
+  <div class="max-w-6xl mx-auto p-4 md:p-8">
+    <!-- Header -->
+    <header class="flex items-center justify-between gap-4 mb-6">
+      <div class="flex items-center gap-3">
+        <img src="icon-192.png" alt="LF" class="h-10 w-10 rounded-xl shadow-glow">
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">Agência LF — Ponto, Tarefas & Projetos</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Produtividade, controle e fluxo de entrega</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="themeToggle" class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm">
+          <span class="inline md:hidden">Tema</span>
+          <span class="hidden md:inline">Alternar Dia/Noite</span>
+        </button>
+        <a href="#" id="installPWA" class="hidden px-3 py-2 rounded-xl bg-indigo-600 text-white text-sm hover:bg-indigo-500">Instalar App</a>
+        <button id="syncBtn" class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">Enviar pendentes</button>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+      <button data-tab="ponto" class="tab-btn active px-4 py-3 rounded-2xl bg-indigo-600 text-white shadow-glow transition transform hover:-translate-y-0.5">Ponto</button>
+      <button data-tab="tarefas" class="tab-btn px-4 py-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-glow transition transform hover:-translate-y-0.5">Tarefas</button>
+      <button data-tab="projetos" class="tab-btn px-4 py-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-glow transition transform hover:-translate-y-0.5">Projetos</button>
+    </div>
+
+    <!-- Conteúdo -->
+    <main class="space-y-10">
+      <!-- PONTO -->
+      <section id="tab-ponto" class="tab-panel">
+  <!-- Resumo do Ponto -->
+  <div id="pontoResumo" class="grid md:grid-cols-4 gap-4 mb-6">
+    <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+      <p class="text-sm text-slate-500 dark:text-slate-400">Lucas (hoje)</p>
+      <p id="todayLucas" class="font-mono text-2xl">00:00:00</p>
+      <canvas id="sparkLucas" width="260" height="50" class="mt-2 w-full"></canvas>
+    </div>
+    <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+      <p class="text-sm text-slate-500 dark:text-slate-400">Felipe (hoje)</p>
+      <p id="todayFelipe" class="font-mono text-2xl">00:00:00</p>
+      <canvas id="sparkFelipe" width="260" height="50" class="mt-2 w-full"></canvas>
+    </div>
+    <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+      <p class="text-sm text-slate-500 dark:text-slate-400">Semana — Lucas</p>
+      <p id="weekLucas" class="font-mono text-xl">00:00:00</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400">últimos 7 dias</p>
+    </div>
+    <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+      <p class="text-sm text-slate-500 dark:text-slate-400">Semana — Felipe</p>
+      <p id="weekFelipe" class="font-mono text-xl">00:00:00</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400">últimos 7 dias</p>
+    </div>
+  </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="md:col-span-1 p-4 rounded-2xl bg-white/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 hover:shadow-glow transition ring-0 hover:ring-1 ring-indigo-400/20">
+            <h2 class="font-semibold text-lg mb-4">Registrar ponto</h2>
+            <label class="block text-sm mb-1">Atividade</label>
+            <input id="atividade" class="w-full mb-3 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-900/40" placeholder="Ex: Landing page — Cliente X"/>
+            <label class="block text-sm mb-1">Quem está registrando</label>
+            <select id="pontoUsuario" class="w-full mb-3 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-900/40">
+              <option value="Felipe">Felipe</option>
+              <option value="Lucas">Lucas</option>
+            </select>
+            
+            <label class="block text-sm mb-1">Projeto (opcional)</label>
+            <select id="atividadeProjeto" class="w-full mb-4 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-900/40"></select>
+
+            <div class="flex items-center justify-between mb-4">
+              <span id="cronometro" class="font-mono text-2xl">00:00:00</span>
+              <span class="text-xs text-slate-500" id="clockNow"></span>
+            </div>
+            <div class="flex gap-3">
+              <button id="btnIniciar" class="flex-1 px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500">Iniciar</button>
+              <button id="btnParar" class="flex-1 px-4 py-2 rounded-xl bg-rose-600 text-white hover:bg-rose-500" disabled>Parar</button>
+            </div>
+          </div>
+
+          <div class="md:col-span-2 p-4 rounded-2xl bg-white/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 hover:shadow-glow transition ring-0 hover:ring-1 ring-indigo-400/20">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="font-semibold text-lg">Registros de hoje</h2>
+              <button id="btnLimparDia" class="text-sm px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700">Limpar lista local</button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="text-left text-slate-500 dark:text-slate-400">
+                  <tr>
+                    <th class="py-2 pr-3">Início</th>
+                    <th class="py-2 pr-3">Fim</th>
+                    <th class="py-2 pr-3">Duração</th>
+                    <th class="py-2 pr-3">Atividade</th>
+                    <th class="py-2 pr-3">Projeto</th>
+                    <th class="py-2 pr-3">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaRegistros"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAREFAS -->
+      <section id="tab-tarefas" class="tab-panel hidden">
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="md:col-span-1 p-4 rounded-2xl bg-white/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 hover:shadow-glow transition ring-0 hover:ring-1 ring-indigo-400/20">
+            <h2 class="font-semibold text-lg mb-4">Nova tarefa</h2>
+            <label class="block text-sm mb-1">Título</label>
+            <input id="tarefaTitulo" class="w-full mb-3 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-900/40" placeholder="Ex: Ajustar hero da LP" />
+            
+            <label class="block text-sm mb-1">Responsável</label>
+            <select id="tarefaResp" class="w-full mb-3 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-900/40">
+              <option value="Felipe">Felipe</option>
+              <option value="Lucas">Lucas</option>
+            </select>
+            <label class="block text-sm mb-1">Prazo</label>
+            <input id="tarefaPrazo" type="date" class="w-full mb-4 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-900/40"/>
+            <button id="btnAddTarefa" class="w-full px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-500">Adicionar</button>
+          </div>
+
+          <div class="md:col-span-2 grid md:grid-cols-2 gap-6">
+            <div class="p-4 rounded-2xl bg-white/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 hover:shadow-glow transition ring-0 hover:ring-1 ring-indigo-400/20">
+              <h3 class="font-semibold mb-3">Felipe</h3>
+              <ul id="listaFelipe" class="space-y-2"></ul>
+            </div>
+            <div class="p-4 rounded-2xl bg-white/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 hover:shadow-glow transition ring-0 hover:ring-1 ring-indigo-400/20">
+              <h3 class="font-semibold mb-3">Lucas</h3>
+              <ul id="listaLucas" class="space-y-2"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROJETOS -->
+      <section id="tab-projetos" class="tab-panel hidden">
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="md:col-span-1 p-4 rounded-2xl bg-white/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 hover:shadow-glow transition ring-0 hover:ring-1 ring-indigo-400/20">
+            <h2 class="font-semibold text-lg mb-4">Novo projeto</h2>
+            <label class="block text-sm mb-1">Nome do projeto</label>
+            <input id="projNome" class="w-full mb-3 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-900/40" placeholder="Ex: Site — Cliente Y" />
+            <label class="block text-sm mb-1">Cliente</label>
+            <input id="projCliente" class="w-full mb-4 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-900/40" placeholder="Ex: Cliente Y"/>
+            <button id="btnAddProjeto" class="w-full px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-500">Criar</button>
+            <p class="text-xs mt-3 text-slate-500 dark:text-slate-400">Fluxo padrão será aplicado automaticamente (1 a 6 com 4.1/4.2).</p>
+          </div>
+
+          <div class="md:col-span-2 space-y-4" id="cardsProjetos"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="text-xs text-slate-500 dark:text-slate-400 mt-10 text-center">Agência LF • PWA • Firebase Realtime DB</footer>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

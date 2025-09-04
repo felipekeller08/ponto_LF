@@ -1,0 +1,8 @@
+/* Camada extra para pequenos ajustes além do Tailwind */
+@keyframes pulse-soft {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.02); opacity: .9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.shadow-glow { box-shadow: 0 0 0 1px rgba(99,102,241,.25), 0 8px 30px rgba(99,102,241,.15); }
+.tab-btn.active { animation: pulse-soft 1.2s ease-in-out; }
